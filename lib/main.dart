@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(CommunityApp());
@@ -10,7 +12,7 @@ class CommunityApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Local Community App',
+      title: 'Aplikacja Społecznościowa',
       theme: ThemeData(primarySwatch: Colors.blue),
       home: HomeScreen(),
     );
@@ -23,56 +25,27 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Community App',
-          style: TextStyle(fontSize: 24), // Większy rozmiar czcionki w tytule
-        ),
-      ),
+      appBar: AppBar(title: Text('Aplikacja Społecznościowa')),
       body: ListView(
-        padding: EdgeInsets.all(24.0), // Większe marginesy
+        padding: EdgeInsets.all(24.0),
         children: [
-          SizedBox(height: 16),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 20), // Większe przyciski
-              textStyle: TextStyle(fontSize: 18), // Większy tekst
-            ),
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => QuestListScreen()),
               );
             },
-            child: Text('Browse Local Quests'),
+            child: Text('Przeglądaj zlecenia'),
           ),
-          SizedBox(height: 16),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 20),
-              textStyle: TextStyle(fontSize: 18),
-            ),
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => AddQuestScreen()),
               );
             },
-            child: Text('Add Your Initiative'),
-          ),
-          SizedBox(height: 16),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 20),
-              textStyle: TextStyle(fontSize: 18),
-            ),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => NeighborsScreen()),
-              );
-            },
-            child: Text('View Neighbors'),
+            child: Text('Dodaj inicjatywę'),
           ),
         ],
       ),
@@ -80,140 +53,137 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class QuestListScreen extends StatelessWidget {
-  final List<String> quests = [
-    'Help with grocery shopping',
-    'Looking for someone to walk my dog',
-    'Organizing a local park cleanup',
-  ];
+class QuestListScreen extends StatefulWidget {
+  const QuestListScreen({super.key});
 
-  QuestListScreen({super.key});
+  @override
+  QuestListScreenState createState() => QuestListScreenState();
+}
+
+class QuestListScreenState extends State<QuestListScreen> {
+  List<Map<String, dynamic>> _quests = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadQuests();
+  }
+
+  Future<void> _loadQuests() async {
+    final prefs = await SharedPreferences.getInstance();
+    final questsString = prefs.getString('quests');
+    if (questsString != null) {
+      setState(() {
+        _quests = List<Map<String, dynamic>>.from(json.decode(questsString));
+      });
+    }
+  }
+
+  Future<void> _saveQuests() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('quests', json.encode(_quests));
+  }
+
+  void _toggleQuestStatus(int index) {
+    setState(() {
+      _quests[index]['accepted'] = !_quests[index]['accepted'];
+    });
+    _saveQuests();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Local Quests',
-          style: TextStyle(fontSize: 24),
-        ),
-      ),
-      body: ListView.builder(
-        padding: EdgeInsets.all(16.0), // Dodajemy marginesy dla listy
-        itemCount: quests.length,
-        itemBuilder: (context, index) {
-          return Card(
-            margin: EdgeInsets.symmetric(vertical: 10), // Większe odstępy
-            child: ListTile(
-              contentPadding: EdgeInsets.all(16.0), // Większe wnętrze kafelka
-              title: Text(
-                quests[index],
-                style: TextStyle(fontSize: 20), // Większy tekst w kafelku
-              ),
-              subtitle: Text(
-                'Tap to learn more',
-                style: TextStyle(fontSize: 16),
-              ),
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Details for: ${quests[index]}')),
+      appBar: AppBar(title: Text('Lista Zleceń')),
+      body: _quests.isEmpty
+          ? Center(child: Text('Brak zleceń.'))
+          : ListView.builder(
+              padding: EdgeInsets.all(16.0),
+              itemCount: _quests.length,
+              itemBuilder: (context, index) {
+                final quest = _quests[index];
+                return Card(
+                  margin: EdgeInsets.symmetric(vertical: 10),
+                  child: ListTile(
+                    contentPadding: EdgeInsets.all(16.0),
+                    title: Text(
+                      quest['description'],
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    subtitle: Text(
+                      quest['accepted'] ? 'Zaakceptowano' : 'Oczekuje',
+                      style: TextStyle(
+                        color: quest['accepted'] ? Colors.green : Colors.red,
+                      ),
+                    ),
+                    trailing: IconButton(
+                      icon: Icon(
+                        quest['accepted'] ? Icons.cancel : Icons.check_circle,
+                        color: quest['accepted'] ? Colors.red : Colors.green,
+                      ),
+                      onPressed: () => _toggleQuestStatus(index),
+                    ),
+                  ),
                 );
               },
             ),
-          );
-        },
-      ),
     );
   }
 }
 
-class AddQuestScreen extends StatelessWidget {
+class AddQuestScreen extends StatefulWidget {
+  const AddQuestScreen({super.key});
+
+  @override
+  AddQuestScreenState createState() => AddQuestScreenState();
+}
+
+class AddQuestScreenState extends State<AddQuestScreen> {
   final TextEditingController _controller = TextEditingController();
 
-  AddQuestScreen({super.key});
+  Future<void> _addQuest(String description) async {
+    final prefs = await SharedPreferences.getInstance();
+    final questsString = prefs.getString('quests');
+    final quests = questsString != null
+        ? List<Map<String, dynamic>>.from(json.decode(questsString))
+        : [];
+    quests.add({'description': description, 'accepted': false});
+    await prefs.setString('quests', json.encode(quests));
+    Navigator.pop(context, true);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Add Initiative',
-          style: TextStyle(fontSize: 24),
-        ),
-      ),
+      appBar: AppBar(title: Text('Dodaj Zlecenie')),
       body: Padding(
-        padding: EdgeInsets.all(24.0), // Większe marginesy dla formularza
+        padding: EdgeInsets.all(24.0),
         child: Column(
           children: [
             TextField(
               controller: _controller,
-              style: TextStyle(fontSize: 18), // Większy tekst w polu tekstowym
+              style: TextStyle(fontSize: 18),
               decoration: InputDecoration(
-                labelText: 'Describe your initiative',
+                labelText: 'Opis zlecenia',
                 labelStyle: TextStyle(fontSize: 18),
               ),
             ),
             SizedBox(height: 20),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(vertical: 20),
-                textStyle: TextStyle(fontSize: 18),
-              ),
               onPressed: () {
-                final quest = _controller.text;
-                if (quest.isNotEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Added initiative: $quest')),
-                  );
-                  _controller.clear();
+                final description = _controller.text;
+                if (description.isNotEmpty) {
+                  _addQuest(description);
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Please enter a description')),
+                    SnackBar(content: Text('Proszę wpisać opis')),
                   );
                 }
               },
-              child: Text('Submit'),
+              child: Text('Dodaj'),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class NeighborsScreen extends StatelessWidget {
-  final List<String> neighbors = [
-    'Alice - Loves gardening',
-    'Bob - Tech enthusiast',
-    'Charlie - Dog owner',
-  ];
-
-  NeighborsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Neighbors',
-          style: TextStyle(fontSize: 24),
-        ),
-      ),
-      body: ListView.builder(
-        padding: EdgeInsets.all(16.0),
-        itemCount: neighbors.length,
-        itemBuilder: (context, index) {
-          return Card(
-            margin: EdgeInsets.symmetric(vertical: 10),
-            child: ListTile(
-              contentPadding: EdgeInsets.all(16.0),
-              title: Text(
-                neighbors[index],
-                style: TextStyle(fontSize: 20),
-              ),
-            ),
-          );
-        },
       ),
     );
   }
