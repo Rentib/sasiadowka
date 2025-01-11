@@ -4,14 +4,9 @@ void main() {
   runApp(CommunityApp());
 }
 
-class CommunityApp extends StatefulWidget {
+class CommunityApp extends StatelessWidget {
   const CommunityApp({super.key});
 
-  @override
-  State<CommunityApp> createState() => _CommunityAppState();
-}
-
-class _CommunityAppState extends State<CommunityApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -28,11 +23,21 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Community App')),
+      appBar: AppBar(
+        title: Text(
+          'Community App',
+          style: TextStyle(fontSize: 24), // Większy rozmiar czcionki w tytule
+        ),
+      ),
       body: ListView(
-        padding: EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(24.0), // Większe marginesy
         children: [
+          SizedBox(height: 16),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(vertical: 20), // Większe przyciski
+              textStyle: TextStyle(fontSize: 18), // Większy tekst
+            ),
             onPressed: () {
               Navigator.push(
                 context,
@@ -41,7 +46,12 @@ class HomeScreen extends StatelessWidget {
             },
             child: Text('Browse Local Quests'),
           ),
+          SizedBox(height: 16),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(vertical: 20),
+              textStyle: TextStyle(fontSize: 18),
+            ),
             onPressed: () {
               Navigator.push(
                 context,
@@ -50,7 +60,12 @@ class HomeScreen extends StatelessWidget {
             },
             child: Text('Add Your Initiative'),
           ),
+          SizedBox(height: 16),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(vertical: 20),
+              textStyle: TextStyle(fontSize: 18),
+            ),
             onPressed: () {
               Navigator.push(
                 context,
@@ -77,18 +92,34 @@ class QuestListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Local Quests')),
+      appBar: AppBar(
+        title: Text(
+          'Local Quests',
+          style: TextStyle(fontSize: 24),
+        ),
+      ),
       body: ListView.builder(
+        padding: EdgeInsets.all(16.0), // Dodajemy marginesy dla listy
         itemCount: quests.length,
         itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(quests[index]),
-            subtitle: Text('Tap to learn more'),
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Details for: ${quests[index]}')),
-              );
-            },
+          return Card(
+            margin: EdgeInsets.symmetric(vertical: 10), // Większe odstępy
+            child: ListTile(
+              contentPadding: EdgeInsets.all(16.0), // Większe wnętrze kafelka
+              title: Text(
+                quests[index],
+                style: TextStyle(fontSize: 20), // Większy tekst w kafelku
+              ),
+              subtitle: Text(
+                'Tap to learn more',
+                style: TextStyle(fontSize: 16),
+              ),
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Details for: ${quests[index]}')),
+                );
+              },
+            ),
           );
         },
       ),
@@ -104,18 +135,30 @@ class AddQuestScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Add Initiative')),
+      appBar: AppBar(
+        title: Text(
+          'Add Initiative',
+          style: TextStyle(fontSize: 24),
+        ),
+      ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(24.0), // Większe marginesy dla formularza
         child: Column(
           children: [
             TextField(
               controller: _controller,
-              decoration:
-                  InputDecoration(labelText: 'Describe your initiative'),
+              style: TextStyle(fontSize: 18), // Większy tekst w polu tekstowym
+              decoration: InputDecoration(
+                labelText: 'Describe your initiative',
+                labelStyle: TextStyle(fontSize: 18),
+              ),
             ),
             SizedBox(height: 20),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(vertical: 20),
+                textStyle: TextStyle(fontSize: 18),
+              ),
               onPressed: () {
                 final quest = _controller.text;
                 if (quest.isNotEmpty) {
@@ -150,12 +193,25 @@ class NeighborsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Neighbors')),
+      appBar: AppBar(
+        title: Text(
+          'Neighbors',
+          style: TextStyle(fontSize: 24),
+        ),
+      ),
       body: ListView.builder(
+        padding: EdgeInsets.all(16.0),
         itemCount: neighbors.length,
         itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(neighbors[index]),
+          return Card(
+            margin: EdgeInsets.symmetric(vertical: 10),
+            child: ListTile(
+              contentPadding: EdgeInsets.all(16.0),
+              title: Text(
+                neighbors[index],
+                style: TextStyle(fontSize: 20),
+              ),
+            ),
           );
         },
       ),
