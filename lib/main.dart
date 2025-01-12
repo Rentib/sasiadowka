@@ -217,11 +217,20 @@ class QuestListScreenState extends State<QuestListScreen> {
   }
 
   void _toggleQuestStatus(int index) {
-    setState(() {
-      _quests[index]['accepted'] = !_quests[index]['accepted'];
-    });
-    _saveQuests();
-  }
+  setState(() {
+    final quest = _quests[index];
+    if (quest['acceptedBy'] == null) {
+      // Accept the quest
+      quest['acceptedBy'] = _currentUser;
+      quest['accepted'] = true;
+    } else if (quest['acceptedBy'] == _currentUser) {
+      // Resign only if current user accepted it
+      quest['acceptedBy'] = null;
+      quest['accepted'] = false;
+    }
+  });
+  _saveQuests();
+}
 
   void _deleteQuest(int index) async {
     setState(() {
@@ -262,6 +271,22 @@ class QuestListScreenState extends State<QuestListScreen> {
                 final quest = _quests[index];
                 final expirationDate = DateTime.parse(quest['expires']);
                 final isExpired = DateTime.now().isAfter(expirationDate);
+                final isAccepted = quest['accepted'] == true;
+                final isAcceptedByMe = quest['acceptedBy'] == _currentUser;
+
+                String statusText;
+                Color textColor;
+
+                if (!isAccepted) {
+                  statusText = 'Oczekuje';
+                  textColor = Colors.red;
+                } else if (isAcceptedByMe || _currentUser == quest['author']) {
+                  statusText = 'Zaakceptowane';
+                  textColor = Colors.green;
+                } else {
+                  statusText = 'Zaakceptowane przez inną osobę';
+                  textColor = Colors.blue;
+                }
 
                 return Card(
                   margin: EdgeInsets.symmetric(vertical: 10),
@@ -295,35 +320,33 @@ class QuestListScreenState extends State<QuestListScreen> {
                             style: TextStyle(fontSize: 18),
                           ),
                           Text(
-                            'Wygasa: ${formatExpiryDate(quest['expires'])}',
+                          'Wygasa: ${formatExpiryDate(quest['expires'])}',
                             style: TextStyle(
                               fontSize: 18,
                               color: isExpired ? Colors.red : Colors.black,
                             ),
                           ),
                           Text(
-                            quest['accepted'] ? 'Zaakceptowano' : 'Oczekuje',
-                            style: TextStyle(
-                              fontSize: 18,
-                              color:
-                                  quest['accepted'] ? Colors.green : Colors.red,
-                            ),
+                            statusText,
+                            style: TextStyle(fontSize: 18, color: textColor),
                           ),
                         ],
                       ),
                     ),
 
                     /// Toggle quest status button on the right
-                    trailing: IconButton(
-                      icon: Icon(
-                        quest['accepted'] ? Icons.cancel : Icons.check_circle,
-                        color: quest['accepted'] ? Colors.red : Colors.green,
-                      ),
-                      onPressed: () => _toggleQuestStatus(index),
-                      tooltip: quest['accepted']
-                          ? 'Odrzuć zaakceptowanie'
-                          : 'Zaakceptuj',
-                    ),
+                    trailing: (quest['author'] == _currentUser || quest['acceptedBy'] != null && quest['acceptedBy'] != _currentUser)
+                        ? null
+                        : IconButton(
+                            icon: Icon(
+                              quest['accepted'] ? Icons.cancel : Icons.check_circle,
+                              color: quest['accepted'] ? Colors.red : Colors.green,
+                            ),
+                            onPressed: () => _toggleQuestStatus(index),
+                            tooltip: quest['accepted']
+                                ? 'Odrzuć zaakceptowanie'
+                                : 'Zaakceptuj',
+                          ),
                   ),
                 );
               },
@@ -331,6 +354,7 @@ class QuestListScreenState extends State<QuestListScreen> {
     );
   }
 }
+
 
 /// Screen for adding new Quests.
 ///  - Automatically sets 'author' to current logged-in user
@@ -411,6 +435,7 @@ class AddQuestScreenState extends State<AddQuestScreen> {
         'location': location,
         'expires': _selectedDate.toIso8601String(),
         'accepted': false,
+        'acceptedBy': null, // Track who accepted the quest
       });
 
       await prefs.setString('quests', json.encode(quests));
