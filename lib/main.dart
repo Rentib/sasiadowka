@@ -157,7 +157,9 @@ class HomeScreenState extends State<HomeScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => ProfileScreen(username: _loggedInUser)),
+                MaterialPageRoute(
+                    builder: (context) =>
+                        ProfileScreen(username: _loggedInUser)),
               );
             },
             child: Text('Profil', style: TextStyle(fontSize: 20)),
@@ -231,20 +233,20 @@ class QuestListScreenState extends State<QuestListScreen> {
   }
 
   void _toggleQuestStatus(int index) {
-  setState(() {
-    final quest = _quests[index];
-    if (quest['acceptedBy'] == null) {
-      // Accept the quest
-      quest['acceptedBy'] = _currentUser;
-      quest['accepted'] = true;
-    } else if (quest['acceptedBy'] == _currentUser) {
-      // Resign only if current user accepted it
-      quest['acceptedBy'] = null;
-      quest['accepted'] = false;
-    }
-  });
-  _saveQuests();
-}
+    setState(() {
+      final quest = _quests[index];
+      if (quest['acceptedBy'] == null) {
+        // Accept the quest
+        quest['acceptedBy'] = _currentUser;
+        quest['accepted'] = true;
+      } else if (quest['acceptedBy'] == _currentUser) {
+        // Resign only if current user accepted it
+        quest['acceptedBy'] = null;
+        quest['accepted'] = false;
+      }
+    });
+    _saveQuests();
+  }
 
   void _deleteQuest(int index) async {
     setState(() {
@@ -330,13 +332,17 @@ class QuestListScreenState extends State<QuestListScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => ProfileScreen(username: quest['author']),
+                                  builder: (context) =>
+                                      ProfileScreen(username: quest['author']),
                                 ),
                               );
                             },
                             child: Text(
                               'Autor: ${quest['author']}',
-                              style: TextStyle(fontSize: 18, color: Colors.blue, decoration: TextDecoration.underline),
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.blue,
+                                  decoration: TextDecoration.underline),
                             ),
                           ),
                           Text(
@@ -359,12 +365,17 @@ class QuestListScreenState extends State<QuestListScreen> {
                     ),
 
                     /// Toggle quest status button on the right
-                    trailing: (quest['author'] == _currentUser || quest['acceptedBy'] != null && quest['acceptedBy'] != _currentUser)
+                    trailing: (quest['author'] == _currentUser ||
+                            quest['acceptedBy'] != null &&
+                                quest['acceptedBy'] != _currentUser)
                         ? null
                         : IconButton(
                             icon: Icon(
-                              quest['accepted'] ? Icons.cancel : Icons.check_circle,
-                              color: quest['accepted'] ? Colors.red : Colors.green,
+                              quest['accepted']
+                                  ? Icons.cancel
+                                  : Icons.check_circle,
+                              color:
+                                  quest['accepted'] ? Colors.red : Colors.green,
                             ),
                             onPressed: () => _toggleQuestStatus(index),
                             tooltip: quest['accepted']
@@ -378,7 +389,6 @@ class QuestListScreenState extends State<QuestListScreen> {
     );
   }
 }
-
 
 /// Screen for adding new Quests.
 ///  - Automatically sets 'author' to current logged-in user
