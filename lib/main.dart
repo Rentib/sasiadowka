@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'profile_screen.dart';
 
 void main() {
   runApp(CommunityApp());
@@ -147,6 +148,19 @@ class HomeScreenState extends State<HomeScreen> {
               );
             },
             child: Text('Dodaj inicjatywę', style: TextStyle(fontSize: 20)),
+          ),
+          SizedBox(height: 16),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ProfileScreen(username: _loggedInUser)),
+              );
+            },
+            child: Text('Profil', style: TextStyle(fontSize: 20)),
           ),
         ],
       ),
@@ -311,16 +325,26 @@ class QuestListScreenState extends State<QuestListScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Autor: ${quest['author']}',
-                            style: TextStyle(fontSize: 18),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ProfileScreen(username: quest['author']),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              'Autor: ${quest['author']}',
+                              style: TextStyle(fontSize: 18, color: Colors.blue, decoration: TextDecoration.underline),
+                            ),
                           ),
                           Text(
                             'Lokalizacja: ${quest['location']}',
                             style: TextStyle(fontSize: 18),
                           ),
                           Text(
-                          'Wygasa: ${formatExpiryDate(quest['expires'])}',
+                            'Wygasa: ${formatExpiryDate(quest['expires'])}',
                             style: TextStyle(
                               fontSize: 18,
                               color: isExpired ? Colors.red : Colors.black,
