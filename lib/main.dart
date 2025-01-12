@@ -7,7 +7,7 @@ void main() {
   runApp(CommunityApp());
 }
 
-/// A custom "Sparkle" theme, just to add some playful color! 
+/// A custom "Sparkle" theme, just to add some playful color!
 final ThemeData sparkleTheme = ThemeData(
   primarySwatch: Colors.purple,
   brightness: Brightness.light,
@@ -21,13 +21,13 @@ final ThemeData sparkleTheme = ThemeData(
 /// We check if a user is already logged in. If yes, go to [HomeScreen].
 /// Otherwise, go to [LoginScreen].
 class CommunityApp extends StatefulWidget {
-  const CommunityApp({Key? key}) : super(key: key);
+  const CommunityApp({super.key});
 
   @override
-  _CommunityAppState createState() => _CommunityAppState();
+  CommunityAppState createState() => CommunityAppState();
 }
 
-class _CommunityAppState extends State<CommunityApp> {
+class CommunityAppState extends State<CommunityApp> {
   bool _isLoggedIn = false;
 
   @override
@@ -59,13 +59,13 @@ class _CommunityAppState extends State<CommunityApp> {
 ///  - Buttons to browse or add Quests
 ///  - A logout action
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  HomeScreenState createState() => HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class HomeScreenState extends State<HomeScreen> {
   String _loggedInUser = '';
 
   @override
@@ -89,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => LoginScreen()),
-      (route) => false, 
+      (route) => false,
     );
   }
 
@@ -158,7 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
 ///  - Toggle "accepted" status
 ///  - Delete (cancel) a Quest if you are the author
 class QuestListScreen extends StatefulWidget {
-  const QuestListScreen({Key? key}) : super(key: key);
+  const QuestListScreen({super.key});
 
   @override
   QuestListScreenState createState() => QuestListScreenState();
@@ -232,10 +232,10 @@ class QuestListScreenState extends State<QuestListScreen> {
 
   String formatExpiryDate(String dateStr) {
     try {
-      final date = DateTime.parse(dateStr); 
+      final date = DateTime.parse(dateStr);
       return DateFormat('yyyy-MM-dd').format(date);
     } catch (e) {
-      return dateStr; 
+      return dateStr;
     }
   }
 
@@ -332,11 +332,11 @@ class QuestListScreenState extends State<QuestListScreen> {
   }
 }
 
-/// Screen for adding new Quests.  
+/// Screen for adding new Quests.
 ///  - Automatically sets 'author' to current logged-in user
 ///  - Defaults location to user's last-used location if available
 class AddQuestScreen extends StatefulWidget {
-  const AddQuestScreen({Key? key}) : super(key: key);
+  const AddQuestScreen({super.key});
 
   @override
   AddQuestScreenState createState() => AddQuestScreenState();
@@ -396,7 +396,9 @@ class AddQuestScreenState extends State<AddQuestScreen> {
     final description = _descriptionController.text.trim();
     final location = _locationController.text.trim();
 
-    if (description.isNotEmpty && _currentUser.isNotEmpty && location.isNotEmpty) {
+    if (description.isNotEmpty &&
+        _currentUser.isNotEmpty &&
+        location.isNotEmpty) {
       final prefs = await SharedPreferences.getInstance();
       final questsString = prefs.getString('quests');
       final quests = questsString != null
@@ -499,13 +501,13 @@ class AddQuestScreenState extends State<AddQuestScreen> {
 
 /// Screen that handles both login and registration.
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  LoginScreenState createState() => LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class LoginScreenState extends State<LoginScreen> {
   bool _isLoginMode = true;
 
   final TextEditingController _usernameController = TextEditingController();
